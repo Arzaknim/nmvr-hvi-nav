@@ -6,7 +6,10 @@ import numpy as np
 # --------------------------------------------------------
 # CONFIG
 # --------------------------------------------------------
-INPUT_FILE = "results.txt"   # your logfile
+# INPUT_FILE = "../NeuronalNetwork/results.txt"
+# INPUT_FILE = "../NeuronalNetwork/easy_medium.txt"
+# INPUT_FILE = "../NeuronalNetwork/medium_hard.txt"
+INPUT_FILE = "../NeuronalNetwork/medium_maze.txt"
 TIME_FORMAT = "%Y-%m-%d %H:%M:%S"
 # --------------------------------------------------------
 
@@ -69,19 +72,37 @@ def main():
     timestamps, avg_rewards, avg_lengths = compute_averages(groups)
 
     # Convert timestamps to numbers for plotting
-    times_num = [date2num(ts) for ts in timestamps]
+    times_num = np.array([date2num(ts) for ts in timestamps])
+
+    # Center time to improve conditioning
+    t_centered = times_num - times_num.mean()
+
+    degree = 4
+
+    # Fit using centered time
+    coeff_reward = np.polyfit(t_centered, avg_rewards, degree)
+    trend_reward = np.poly1d(coeff_reward)
+
+    coeff_length = np.polyfit(t_centered, avg_lengths, degree)
+    trend_length = np.poly1d(coeff_length)
 
     # Plot
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 8), sharex=True)
 
-    ax1.plot(times_num, avg_rewards, marker='o')
+    # Rewards
+    ax1.plot(times_num, avg_rewards, marker='o', label="Average Reward")
+    ax1.plot(times_num, trend_reward(t_centered), 'r--', label="Reward Trend")
     ax1.set_ylabel("Average Reward")
     ax1.grid(True)
+    ax1.legend()
 
-    ax2.plot(times_num, avg_lengths, marker='o', color='orange')
+    # Episode lengths
+    ax2.plot(times_num, avg_lengths, marker='o', color='orange', label="Average Episode Length")
+    ax2.plot(times_num, trend_length(t_centered), 'r--', label="Length Trend")
     ax2.set_ylabel("Average Episode Length")
-    ax2.grid(True)
     ax2.set_xlabel("Time")
+    ax2.grid(True)
+    ax2.legend()
 
     # Auto-format timestamps
     fig.autofmt_xdate()
