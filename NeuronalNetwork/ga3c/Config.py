@@ -32,13 +32,21 @@ class Config:
     #########################################################################
     # Environment configuration
 
-    # Path of the world
-    #PATH_TO_WORLD = ["../Simulation2d/world/room"]
-    # Use this for multiple Environments in parallel
-    #PATH_TO_WORLD = [ "../Simulation2d/world/room" , "../Simulation2d/world/four_rooms" , "../Simulation2d/world/roblab" ]
-    # "../Simulation2d/world/square", "../Simulation2d/world/room",
-    PATH_TO_WORLD = ['../Simulation2d/world/maze', "../Simulation2d/world/room"]
+    FUZZY_WEIGHT = 0.7
 
+    # Try Maze
+    # PATH_TO_WORLD = ['../Simulation2d/world/maze', "../Simulation2d/world/room"]
+    # Basic Training
+    # PATH_TO_WORLD = ['../Simulation2d/world/square', "../Simulation2d/world/room", "../tools/hard"]
+
+    WORLD = 2
+
+    if WORLD == 0:
+        PATH_TO_WORLD = ["../Simulation2d/world/square", "../Simulation2d/world/room"]
+    elif WORLD == 1:
+        PATH_TO_WORLD = ["../Simulation2d/world/room", "../tools/hard"]
+    elif WORLD == 2:
+        PATH_TO_WORLD = ["../Simulation2d/world/room", "../Simulation2d/world/maze"]
 
     # Mode
     MODE=Mode.ALL_RANDOM
@@ -68,7 +76,7 @@ class Config:
 
     # If the dynamic configuration is on, these are the initial values.
     # Number of Agents
-    AGENTS = 64#32
+    AGENTS = 64 #32
     # Number of Predictors
     PREDICTORS = 8 #2
     # Number of Trainers

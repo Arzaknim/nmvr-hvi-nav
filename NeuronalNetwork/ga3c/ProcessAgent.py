@@ -35,7 +35,7 @@ from .Environment import Environment
 from .Experience import Experience
 
 from fuzzy_strangerDanger import Fuzzy_inference
-fuzzy = Fuzzy_inference(max_dist=10)
+fuzzy = Fuzzy_inference(max_dist=1)
 
 
 class ProcessAgent(Process):
@@ -103,7 +103,49 @@ class ProcessAgent(Process):
                 continue
 
             prediction, value = self.predict(self.env.current_state)
-            action = self.select_action(prediction)
+
+            scan = self.env.current_state[:1081]
+            sector = 1081 // 5
+
+            FL = float(np.min(scan[0:sector]))
+            L = float(np.min(scan[sector:2 * sector]))
+            C = float(np.min(scan[2 * sector:3 * sector]))
+            R = float(np.min(scan[3 * sector:4 * sector]))
+            FR = float(np.min(scan[4 * sector:5 * sector]))
+
+            correction = fuzzy.eval(FL, L, C, R, FR)
+
+            # front_near = log["conditions"]["front_near"]
+            # left_blocked = log["conditions"]["left_blocked"]
+            # right_blocked = log["conditions"]["right_blocked"]
+            #
+            # danger = max(front_near, left_blocked, right_blocked)
+
+            if correction < -0.85:
+                fuzzy_action = 0
+            elif correction < -0.55:
+                fuzzy_action = 1
+            elif correction < -0.25:
+                fuzzy_action = 2
+            elif correction < 0.25:
+                fuzzy_action = 3
+            elif correction < 0.55:
+                fuzzy_action = 4
+            elif correction < 0.85:
+                fuzzy_action = 5
+            else:
+                fuzzy_action = 6
+
+            if abs(correction) > 0.7:
+                action = fuzzy_action
+            else:
+                action = self.select_action(prediction)
+
+            # if danger > 0.6:
+            #     action = fuzzy_action
+            # else:
+            #     action = self.select_action(prediction)
+
             reward, done = self.env.step(action)
             reward_sum += reward
 
